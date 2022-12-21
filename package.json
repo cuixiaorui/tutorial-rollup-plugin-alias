@@ -1,0 +1,20 @@
+{
+	"name": "tutorial-rollup-plugin-alias",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/alias.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "rollup -c rollup.config.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"rollup": "^3.6.0",
+		"rollup-plugin-typescript": "^1.0.1",
+		"tslib": "^2.4.1",
+		"typescript": "^4.9.3"
+	}
+}
