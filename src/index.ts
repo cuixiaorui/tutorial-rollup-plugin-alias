@@ -12,12 +12,12 @@ const alias = (options: Options) => {
 
   return {
     resolveId(source: string, importer: string | undefined) {
-      for (const entry of entries) {
-        const { find, replacement } = entry;
-        if (entry.match(source)) {
-          return source.replace(find, replacement);
-        }
-      }
+      const matchedEntry = entries.find((entry) => entry.match(source));
+
+      if (!matchedEntry) return null;
+
+      const { find, replacement } = matchedEntry;
+      return source.replace(find, replacement);
     },
   };
 };
@@ -39,7 +39,7 @@ class Entry {
 }
 
 function normalizeEntries(options: Options): Entry[] {
-  const {entries} = options
+  const { entries } = options;
   if (Array.isArray(entries)) {
     return entries.map(({ find, replacement }) => {
       return new Entry(find, replacement);
