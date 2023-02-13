@@ -1,54 +1,59 @@
-interface Alias {
-  find: string | RegExp;
-  replacement: string;
+import { Plugin } from "rollup";
+
+interface Entries {
+  [key: string]: string;
 }
 
-interface Options {
-  entries: Alias[] | { [find: string]: string };
+interface AliasOption {
+  entries: Entries | { find: string | RegExp; replacement: string }[];
 }
 
-const alias = (options: Options) => {
-  const entries = normalizeEntries(options);
-
+export function alias(option: AliasOption): Plugin {
+  const entries = normalizeEntries(option.entries);
   return {
-    resolveId(source: string, importer: string | undefined) {
-      const matchedEntry = entries.find((entry) => entry.match(source));
+    name: "alias",
+    resolveId(source: string) {
+      // 查找一下 看看有没有 对应的 entry
+      const entry = entries.find((e) => {
+        return e.match(source);
+      });
 
-      if (!matchedEntry) return null;
+      if (!entry) {
+        return source;
+      }
 
-      const { find, replacement } = matchedEntry;
-      return source.replace(find, replacement);
+      return entry.replace(source);
     },
   };
-};
+}
+
+function normalizeEntries(entries: AliasOption["entries"]) {
+  if (Array.isArray(entries)) {
+    return entries.map((e) => {
+      return new Entry(e.find, e.replacement);
+    });
+  } else {
+    return Object.keys(entries).map((key) => {
+      return new Entry(key, entries[key])
+    });
+  }
+}
 
 class Entry {
-  find: string | RegExp;
-  replacement: string;
-  constructor(find: string | RegExp, replacement: string) {
+  constructor(private find: string | RegExp, private replacement: string) {
     this.find = find;
     this.replacement = replacement;
   }
-  match(source: string) {
+
+  match(filePath: string) {
     if (typeof this.find === "string") {
-      return source.startsWith(this.find + "/");
+      return filePath.startsWith(this.find);
     } else {
-      return this.find.test(source);
+      return this.find.test(filePath);
     }
   }
-}
 
-function normalizeEntries(options: Options): Entry[] {
-  const { entries } = options;
-  if (Array.isArray(entries)) {
-    return entries.map(({ find, replacement }) => {
-      return new Entry(find, replacement);
-    });
+  replace(filePath: string) {
+    return filePath.replace(this.find, this.replacement) + ".js";
   }
-
-  return Object.entries(entries).map(([find, replacement]) => {
-    return new Entry(find, replacement);
-  });
 }
-
-export { alias };

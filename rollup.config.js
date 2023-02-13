@@ -1,10 +1,17 @@
-import typescript from "rollup-plugin-typescript";
+import { defineConfig } from "rollup";
+import typescript from "@rollup/plugin-typescript";
 
-export default {
-  input: "src/index.ts",
+export default defineConfig({
+  input: "./src/index.ts",
   output: {
-    file: "dist/alias.js",
+    file: "./dist/index.js",
     format: "es",
   },
-  plugins: [typescript()],
-};
+  plugins: [
+    typescript({
+      module: "esnext",
+      declaration: true,
+      outDir: "./dist",
+    }),
+  ],
+});

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { alias } from "./main";
+import { alias } from ".";
 
 describe("entries is object", () => {
   it("should replace alias value when match", () => {
