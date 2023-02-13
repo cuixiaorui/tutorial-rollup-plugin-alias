@@ -1,4 +1,5 @@
 import { Plugin } from "rollup";
+// import nodeResolvePlugin from '@rollup/plugin-node-resolve';
 
 interface Entries {
   [key: string]: string;
@@ -12,7 +13,7 @@ export function alias(option: AliasOption): Plugin {
   const entries = normalizeEntries(option.entries);
   return {
     name: "alias",
-    resolveId(source: string) {
+    resolveId(source: string, importer) {
       // 查找一下 看看有没有 对应的 entry
       const entry = entries.find((e) => {
         return e.match(source);
@@ -22,7 +23,11 @@ export function alias(option: AliasOption): Plugin {
         return source;
       }
 
-      return entry.replace(source);
+      const updatedId = entry.replace(source);
+
+      return this.resolve(updatedId, importer).then((resolved) => {
+        return resolved || { id: updatedId };
+      });
     },
   };
 }
@@ -34,7 +39,7 @@ function normalizeEntries(entries: AliasOption["entries"]) {
     });
   } else {
     return Object.keys(entries).map((key) => {
-      return new Entry(key, entries[key])
+      return new Entry(key, entries[key]);
     });
   }
 }
@@ -54,6 +59,6 @@ class Entry {
   }
 
   replace(filePath: string) {
-    return filePath.replace(this.find, this.replacement) + ".js";
+    return filePath.replace(this.find, this.replacement);
   }
 }
